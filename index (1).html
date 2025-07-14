@@ -1,0 +1,821 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Painel Operacional - Newelog</title>
+    <style>
+        :root {
+            --primary-color: #667eea;
+            --secondary-color: #764ba2;
+            --header-bg: white;
+            --header-text: #333;
+            --body-font: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            --card-bg: white;
+            --link-bg: #f8f9fa;
+            --link-text: #333;
+            --search-border: #e0e0e0;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: var(--body-font);
+            background: linear-gradient(135deg, var(--primary-color) 0%, var(--secondary-color) 100%);
+            min-height: 100vh;
+            padding: 20px;
+            color: #333;
+        }
+
+        .customization-panel {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            background: white;
+            border-radius: 15px;
+            padding: 20px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+            z-index: 1000;
+            max-width: 300px;
+            transform: translateX(100%);
+            transition: transform 0.3s ease;
+        }
+
+        .customization-panel.open {
+            transform: translateX(0);
+        }
+
+        .customization-toggle {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            background: var(--primary-color);
+            color: white;
+            border: none;
+            border-radius: 50%;
+            width: 50px;
+            height: 50px;
+            cursor: pointer;
+            font-size: 20px;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+            z-index: 1001;
+            transition: all 0.3s ease;
+        }
+
+        .customization-toggle:hover {
+            transform: scale(1.1);
+        }
+
+        .customization-section {
+            margin-bottom: 20px;
+        }
+
+        .customization-section h3 {
+            font-size: 14px;
+            margin-bottom: 10px;
+            color: #333;
+            font-weight: 600;
+        }
+
+        .color-input {
+            width: 100%;
+            height: 40px;
+            border: 2px solid #e0e0e0;
+            border-radius: 8px;
+            margin-bottom: 10px;
+            cursor: pointer;
+        }
+
+        .font-select {
+            width: 100%;
+            padding: 8px;
+            border: 2px solid #e0e0e0;
+            border-radius: 8px;
+            margin-bottom: 10px;
+            font-size: 14px;
+        }
+
+        .reset-btn {
+            width: 100%;
+            padding: 10px;
+            background: #dc3545;
+            color: white;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 14px;
+            margin-top: 10px;
+        }
+
+        .reset-btn:hover {
+            background: #c82333;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            background: rgba(255, 255, 255, 0.95);
+            border-radius: 20px;
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
+            backdrop-filter: blur(10px);
+            overflow: hidden;
+        }
+
+        .header {
+            background: var(--header-bg);
+            color: var(--header-text);
+            padding: 40px 30px;
+            text-align: center;
+            position: relative;
+        }
+
+        .header::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: none;
+            opacity: 0.3;
+        }
+
+        .header img {
+            max-width: 200px;
+            height: auto;
+            margin-bottom: 10px;
+            position: relative;
+            z-index: 1;
+        }
+
+        .header h1 {
+            font-size: 2.5rem;
+            font-weight: 700;
+            margin-bottom: 10px;
+            position: relative;
+            z-index: 1;
+        }
+
+        .header p {
+            font-size: 1.1rem;
+            opacity: 0.9;
+            position: relative;
+            z-index: 1;
+        }
+
+        .content {
+            padding: 30px;
+        }
+
+        .search-container {
+            margin-bottom: 30px;
+            position: relative;
+        }
+
+        .search-box {
+            width: 100%;
+            padding: 15px 50px 15px 20px;
+            border: 2px solid var(--search-border);
+            border-radius: 50px;
+            font-size: 16px;
+            outline: none;
+            transition: all 0.3s ease;
+        }
+
+        .search-box:focus {
+            border-color: var(--primary-color);
+            box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+        }
+
+        .search-icon {
+            position: absolute;
+            right: 20px;
+            top: 50%;
+            transform: translateY(-50%);
+            color: #999;
+        }
+
+        .categories-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
+            gap: 25px;
+        }
+
+        .category-card {
+            background: var(--card-bg);
+            border-radius: 15px;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.08);
+            transition: all 0.3s ease;
+            overflow: hidden;
+            border: 1px solid #f0f0f0;
+        }
+
+        .category-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 15px 30px rgba(0, 0, 0, 0.15);
+        }
+
+        .category-header {
+            background: linear-gradient(135deg, var(--primary-color) 0%, var(--secondary-color) 100%);
+            color: white;
+            padding: 20px;
+            position: relative;
+        }
+
+        .category-header h2 {
+            font-size: 1.3rem;
+            font-weight: 600;
+            margin: 0;
+        }
+
+        .category-content {
+            padding: 20px;
+        }
+
+        .link-item {
+            display: block;
+            padding: 12px 15px;
+            margin-bottom: 8px;
+            background: var(--link-bg);
+            border-radius: 8px;
+            text-decoration: none;
+            color: var(--link-text);
+            transition: all 0.3s ease;
+            border-left: 4px solid transparent;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .link-item::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 0;
+            height: 100%;
+            background: linear-gradient(135deg, var(--primary-color) 0%, var(--secondary-color) 100%);
+            transition: width 0.3s ease;
+            z-index: 0;
+        }
+
+        .link-item span {
+            position: relative;
+            z-index: 1;
+            transition: color 0.3s ease;
+        }
+
+        .link-item:hover {
+            transform: translateX(5px);
+            border-left-color: var(--primary-color);
+            box-shadow: 0 3px 10px rgba(0, 0, 0, 0.1);
+        }
+
+        .link-item:hover::before {
+            width: 100%;
+        }
+
+        .link-item:hover span {
+            color: white;
+        }
+
+        .link-item:last-child {
+            margin-bottom: 0;
+        }
+
+        .highlighted-link span {
+            color: #007bff;
+            font-weight: bold;
+        }
+
+        .stats {
+            display: flex;
+            justify-content: center;
+            gap: 30px;
+            margin-top: 30px;
+            padding: 20px;
+            background: #f8f9fa;
+            border-radius: 15px;
+        }
+
+        .stat-item {
+            text-align: center;
+        }
+
+        .stat-number {
+            font-size: 2rem;
+            font-weight: 700;
+            color: var(--primary-color);
+            display: block;
+        }
+
+        .stat-label {
+            font-size: 0.9rem;
+            color: #666;
+            margin-top: 5px;
+        }
+
+        .hidden {
+            display: none;
+        }
+
+        @media (max-width: 768px) {
+            .header h1 {
+                font-size: 2rem;
+            }
+
+            .categories-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .stats {
+                flex-direction: column;
+                gap: 15px;
+            }
+
+            .container {
+                margin: 10px;
+                border-radius: 15px;
+            }
+
+            body {
+                padding: 10px;
+            }
+
+            .customization-panel {
+                top: 10px;
+                right: 10px;
+                max-width: 250px;
+            }
+
+            .customization-toggle {
+                top: 10px;
+                right: 10px;
+            }
+        }
+
+        .no-results {
+            text-align: center;
+            padding: 40px;
+            color: #666;
+            font-size: 1.1rem;
+        }
+
+        .external-link-icon {
+            opacity: 0.6;
+            margin-left: 8px;
+            font-size: 0.8rem;
+        }
+    </style>
+</head>
+<body>
+    <!-- Botão de personalização -->
+    <button class="customization-toggle" onclick="toggleCustomization()">⚙️</button>
+
+    <!-- Painel de personalização -->
+    <div class="customization-panel" id="customizationPanel">
+        <div class="customization-section">
+            <h3>🎨 Cores Principais</h3>
+            <input type="color" class="color-input" id="primaryColor" value="#667eea" onchange="updateColors()">
+            <label for="primaryColor" style="font-size: 12px;">Cor Primária</label>
+        </div>
+
+        <div class="customization-section">
+            <input type="color" class="color-input" id="secondaryColor" value="#764ba2" onchange="updateColors()">
+            <label for="secondaryColor" style="font-size: 12px;">Cor Secundária</label>
+        </div>
+
+        <div class="customization-section">
+            <h3>🏠 Cabeçalho</h3>
+            <input type="color" class="color-input" id="headerBg" value="#ffffff" onchange="updateColors()">
+            <label for="headerBg" style="font-size: 12px;">Fundo do Cabeçalho</label>
+        </div>
+
+        <div class="customization-section">
+            <input type="color" class="color-input" id="headerText" value="#333333" onchange="updateColors()">
+            <label for="headerText" style="font-size: 12px;">Texto do Cabeçalho</label>
+        </div>
+
+        <div class="customization-section">
+            <h3>🔤 Fonte</h3>
+            <select class="font-select" id="fontFamily" onchange="updateFont()">
+                <option value="'Segoe UI', Tahoma, Geneva, Verdana, sans-serif">Segoe UI</option>
+                <option value="'Arial', sans-serif">Arial</option>
+                <option value="'Helvetica', sans-serif">Helvetica</option>
+                <option value="'Times New Roman', serif">Times New Roman</option>
+                <option value="'Georgia', serif">Georgia</option>
+                <option value="'Courier New', monospace">Courier New</option>
+                <option value="'Roboto', sans-serif">Roboto</option>
+                <option value="'Open Sans', sans-serif">Open Sans</option>
+                <option value="'Lato', sans-serif">Lato</option>
+                <option value="'Montserrat', sans-serif">Montserrat</option>
+            </select>
+        </div>
+
+        <div class="customization-section">
+            <h3>🔗 Links</h3>
+            <input type="color" class="color-input" id="linkBg" value="#f8f9fa" onchange="updateColors()">
+            <label for="linkBg" style="font-size: 12px;">Fundo dos Links</label>
+        </div>
+
+        <div class="customization-section">
+            <input type="color" class="color-input" id="linkText" value="#333333" onchange="updateColors()">
+            <label for="linkText" style="font-size: 12px;">Texto dos Links</label>
+        </div>
+
+        <button class="reset-btn" onclick="resetToDefault()">🔄 Restaurar Padrão</button>
+    </div>
+
+    <div class="container">
+        <div class="header">
+            <img src="logo.jpeg" alt="Newe Logística Integrada">
+            <h1>Painel Operacional</h1>
+        </div>
+
+        <div class="content">
+            <div class="search-container">
+                <input type="text" class="search-box" placeholder="Buscar links..." id="searchInput">
+                <span class="search-icon">🔍</span>
+            </div>
+
+            <div class="categories-grid" id="categoriesGrid">
+                <!-- OUTROS CLIENTES -->
+                <div class="category-card" data-category="outros clientes">
+                    <div class="category-header">
+                        <h2>📋 Outros Clientes</h2>
+                    </div>
+                    <div class="category-content">
+                        <a href="https://newelog-my.sharepoint.com/:l:/g/personal/lael_muller_newelog_com_br/FMYSGKNQlehCgNMjmted0owByi9U9Q3ZfgbPxWoUpz55wQ?nav=YTZhOTkwMzQtNDBlYi00ODQyLWFkMDItYWI5MjA5Njg1NTU0" target="_blank" class="link-item">
+                            <span>Forms gestão de coletas <span class="external-link-icon">↗</span></span>
+                        </a>
+                        <a href="https://newelog-my.sharepoint.com/personal/lael_muller_newelog_com_br/Lists/Gesto%20de%20coleta/AllItems.aspx?env=WebViewList" target="_blank" class="link-item">
+                            <span>Planilha - Gestão de coletas <span class="external-link-icon">↗</span></span>
+                        </a>
+                        <a href="https://accounts.esales.com.br/login" target="_blank" class="link-item">
+                            <span>Entregou <span class="external-link-icon">↗</span></span>
+                        </a>
+                        <a href="https://forms.office.com/Pages/ResponsePage.aspx?id=dnsOpaWOLEm_F5fWUvw86dz_6NYUA5BCoZuWtvrXno1UQkxGMDZPVlo3WldNR0JMMzVRRlUzRE8wUS4u" target="_blank" class="link-item">
+                            <span>Forms devolução Somos <span class="external-link-icon">↗</span></span>
+                        </a>
+                        <a href="https://newelog-my.sharepoint.com/:x:/g/personal/igor_carvalho_newelog_com_br/EUDS6pYkvnVOkqxEausEH14Br964ej5ZrNVF0P41T1_2lA?e=Bp7OGH" target="_blank" class="link-item">
+                            <span>Acompanhamento LR <span class="external-link-icon">↗</span></span>
+                        </a>
+                    </div>
+                </div>
+
+                <!-- HS -->
+                <div class="category-card" data-category="hs">
+                    <div class="category-header">
+                        <h2>✈️ HS</h2>
+                    </div>
+                    <div class="category-content">
+                        <a href="https://newelog-my.sharepoint.com/:x:/g/personal/lael_muller_newelog_com_br/EU7Lktx65ChMi6cYbf-Mq6oBCmrlREpknFahn2lXtg3KHA?e=i4YVKB" target="_blank" class="link-item">
+                            <span>Planilha Gestão - HS <span class="external-link-icon">↗</span></span>
+                        </a>
+                        <a href="https://www.latamcargo.com/en/trackshipment?docNumber=52555440&docPrefix=957&soType=SO" target="_blank" class="link-item">
+                            <span>Rastreio LATAM <span class="external-link-icon">↗</span></span>
+                        </a>
+                        <a href="https://servicos.gollog.com.br/app/site/tracking" target="_blank" class="link-item">
+                            <span>Rastreio GOLLOG <span class="external-link-icon">↗</span></span>
+                        </a>
+                        <a href="https://www.azulcargoexpress.com.br/Rastreio/Rastreio" target="_blank" class="link-item">
+                            <span>Rastreio AZUL <span class="external-link-icon">↗</span></span>
+                        </a>
+                        <a href="https://www.latamcargo.com/en/eminuta" target="_blank" class="link-item">
+                            <span>Minuta Eletronica - LATAM <span class="external-link-icon">↗</span></span>
+                        </a>
+                        <a href="https://newelog-my.sharepoint.com/:b:/g/personal/diego_savio_newelog_com_br/EY8cJJhTVYlEvBv4xGz935ABUDtfBoEQWgsVeG6ikxdw5w?e=6kpr57" target="_blank" class="link-item">
+                            <span>Minuta - GOLLOG <span class="external-link-icon">↗</span></span>
+                        </a>
+                        <a href="https://newelog-my.sharepoint.com/:x:/g/personal/diego_savio_newelog_com_br/EVyzWDf83yFJtVK7umbbS3wBy5NxnDA7iUbJzcMlCybJ1w?e=wW9Qdx" target="_blank" class="link-item">
+                            <span>Minuta - AZUL <span class="external-link-icon">↗</span></span>
+                        </a>
+                        <a href="https://newelog-my.sharepoint.com/:x:/g/personal/diego_savio_newelog_com_br/EYIt8VgHTKtHsaa5ss4nmycBfNsetRwVstEm-YivJKZ0Vg?e=WUT7gy" target="_blank" class="link-item">
+                            <span>Minuta - LATAM <span class="external-link-icon">↗</span></span>
+                        </a>
+                        <a href="https://online.sefaz.am.gov.br/nfselada/consultanf.asp" target="_blank" class="link-item">
+                            <span>Consulta NF MAO <span class="external-link-icon">↗</span></span>
+                        </a>
+                        <a href="https://newelog-my.sharepoint.com/:x:/g/personal/lael_muller_newelog_com_br/EUNF51iWTr1MjmzfROKlP9YBwQm4JvFpZz3y3j5FfM1wqw?e=32PtrL" target="_blank" class="link-item">
+                            <span>Iata AEREA - SUBIR DOC ONEDRIVE <span class="external-link-icon">↗</span></span>
+                        </a>
+                        <a href="https://flylogexpress.brudam.com.br/site/" target="_blank" class="link-item">
+                            <span>Comprovantes SSA - FLYLOG <span class="external-link-icon">↗</span></span>
+                        </a>
+                        <a href="https://latamcargodom.zendesk.com/hc/pt-br/requests/new" target="_blank" class="link-item">
+                            <span>TICKET LATAM <span class="external-link-icon">↗</span></span>
+                        </a>
+                    </div>
+                </div>
+
+                <!-- TP -->
+                <div class="category-card" data-category="tp">
+                    <div class="category-header">
+                        <h2>🚛 TP</h2>
+                    </div>
+                    <div class="category-content">
+                        <a href="https://newelog-my.sharepoint.com/:x:/g/personal/luis_oliveira_newelog_com_br/EUYO2i9KZFJIgf_E3YpGfjoB73Pwnq8Ejx2x26_UiuUR_w?e=vW5nUY" target="_blank" class="link-item">
+                            <span>Gestão de coleta TP <span class="external-link-icon">↗</span></span>
+                        </a>
+                        <a href="https://br.aware.blue/login" target="_blank" class="link-item">
+                            <span>Bluebee <span class="external-link-icon">↗</span></span>
+                        </a>
+                        <a href="https://www.rotadareciclagem.com.br/p/cempre1" target="_blank" class="link-item">
+                            <span>Maps RECICLA <span class="external-link-icon">↗</span></span>
+                        </a>
+                    </div>
+                </div>
+
+                <!-- GR E RASTREAMENTO -->
+                <div class="category-card" data-category="gr e rastreamento">
+                    <div class="category-header">
+                        <h2>📍 GR e Rastreamento</h2>
+                    </div>
+                    <div class="category-content">
+                        <a href="https://buonnycheck.buonny.com.br/#/signin" target="_blank" class="link-item">
+                            <span>Buonny Check <span class="external-link-icon">↗</span></span>
+                        </a>
+                        <a href="https://buonny.com.br/minha-buonny/" target="_blank" class="link-item">
+                            <span>Minha buonny <span class="external-link-icon">↗</span></span>
+                        </a>
+                        <a href="https://portal.buonny.com.br/portal/" target="_blank" class="link-item">
+                            <span>Buonny Portal <span class="external-link-icon">↗</span></span>
+                        </a>
+                        <a href="https://newrastreamentoonline.com.br/new/login" target="_blank" class="link-item">
+                            <span>Trucks control Iscas <span class="external-link-icon">↗</span></span>
+                        </a>
+                        <a href="https://newelog-my.sharepoint.com/:p:/g/personal/lael_muller_newelog_com_br/Eb-ooFixiU1PtWISHozX5gwB2l-P81LJfqS7OOYgrxjlgQ?e=AOWSDo" target="_blank" class="link-item">
+                            <span>Passo a passo rastreio - Subir DOC <span class="external-link-icon">↗</span></span>
+                        </a>
+                        <a href="https://newelog-my.sharepoint.com/:b:/g/personal/lael_muller_newelog_com_br/EX7VsQ1FAmJFt8fx_TYFNesBj2-sv9bxiP6AcWSHbXgX9w?e=bZpofl" target="_blank" class="link-item">
+                            <span>Transferência de Sinal - Subir DOC <span class="external-link-icon">↗</span></span>
+                        </a>
+                    </div>
+                </div>
+
+                <!-- PEDÁGIOS -->
+                <div class="category-card" data-category="pedágios">
+                    <div class="category-header">
+                        <h2>🛣️ Pedágios</h2>
+                    </div>
+                    <div class="category-content">
+                        <a href="https://qualp.com.br/#/" target="_blank" class="link-item">
+                            <span>QUALP <span class="external-link-icon">↗</span></span>
+                        </a>
+                    </div>
+                </div>
+
+                <!-- CHECKLISTS -->
+                <div class="category-card" data-category="checklists">
+                    <div class="category-header">
+                        <h2>✅ Checklists</h2>
+                    </div>
+                    <div class="category-content">
+                        <a href="https://forms.office.com/r/mwtbz1rrR3" target="_blank" class="link-item">
+                            <span>Cadastro de agregados <span class="external-link-icon">↗</span></span>
+                        </a>
+                        <a href="https://docs.google.com/forms/d/e/1FAIpQLSe_rtDSFSSoKNRxxZUhvA2FHzSkqDLtt3TVh1K5z6XNK4JihQ/viewform" target="_blank" class="link-item">
+                            <span>Formulario Check List Agregados <span class="external-link-icon">↗</span></span>
+                        </a>
+                        <a href="https://newelog-my.sharepoint.com/:l:/g/personal/lael_muller_newelog_com_br/FFi7pVPJ9Q1Pvn2_ws2wlikBYIWX02-KXgTDJELGCCYjZw?nav=ZjIxYjIwN2YtZjAwYi00ZDQ4LWJhODQtMGE3NmU2OWM3ZjM2" target="_blank" class="link-item">
+                            <span>Forms checklist frota <span class="external-link-icon">↗</span></span>
+                        </a>
+                        <a href="https://newelog-my.sharepoint.com/personal/lael_muller_newelog_com_br/Lists/Checklist_Frota_NEWELOG/AllItems.aspx?env=WebViewList&npsAction=createList" target="_blank" class="link-item">
+                            <span>Respostas Checklist frota <span class="external-link-icon">↗</span></span>
+                        </a>
+                        <a href="https://newelog-my.sharepoint.com/:l:/g/personal/lael_muller_newelog_com_br/FBtGWNx63dpDrlPaHkWGGIsBNYB1szyoXy_jy_v7xEssrQ?nav=MWJiZWJjZjMtYzQyMi00ZTdkLTlmYmQtMTM0YjcxMTY4ZGI0" target="_blank" class="link-item">
+                            <span>Formulario de abertura empresa <span class="external-link-icon">↗</span></span>
+                        </a>
+                        <a href="https://newelog-my.sharepoint.com/personal/lael_muller_newelog_com_br/Lists/Formulrio%20%20Abertura/AllItems.aspx?env=WebViewList" target="_blank" class="link-item">
+                            <span>Respostas abertura <span class="external-link-icon">↗</span></span>
+                        </a>
+                        <a href="https://newelog-my.sharepoint.com/:l:/g/personal/lael_muller_newelog_com_br/FHLpOT91s6dOsiJn1jlOhz8BBpulNxxkyprtAR8iQbp6Tw?nav=ZGUzNmY0NTctY2ViYy00ZjI4LWExMDItMzMyZjBmNDlhNjM4" target="_blank" class="link-item">
+                            <span>Formulario de fechamento empresa <span class="external-link-icon">↗</span></span>
+                        </a>
+                        <a href="https://newelog-my.sharepoint.com/personal/lael_muller_newelog_com_br/Lists/Formulrio%20de%20fechamento/AllItems.aspx?env=WebViewList" target="_blank" class="link-item">
+                            <span>Respostas Fechamento <span class="external-link-icon">↗</span></span>
+                        </a>
+                        <a href="https://newelog-my.sharepoint.com/:l:/g/personal/lael_muller_newelog_com_br/FDkFQygLKChJll604yqq-WYBqWdx1hh8kErAyKDLgvVQAA?nav=NzVmNTRmYzYtNzM2YS00OWU5LWJkM2ItNWY0ZTJiMWViNmNh" target="_blank" class="link-item">
+                            <span>FORMULARIO MANUTENÇÃO PREDIAL <span class="external-link-icon">↗</span></span>
+                        </a>
+                        <a href="https://newelog-my.sharepoint.com/personal/lael_muller_newelog_com_br/Lists/Formulrio%20de%20Manuteno%20Predial%20%20NEWE/AllItems.aspx?env=WebViewList&npsAction=createList" target="_blank" class="link-item">
+                            <span>RESPOSTAS MANUTENÇÃO PREDIAL <span class="external-link-icon">↗</span></span>
+                        </a>
+                    </div>
+                </div>
+
+                <!-- LINKS GERAIS -->
+                <div class="category-card" data-category="links gerais">
+                    <div class="category-header">
+                        <h2>🌐 Links Gerais</h2>
+                    </div>
+                    <div class="category-content">
+                        <a href="https://newelog.eslcloud.com.br/tms" target="_blank" class="link-item">
+                            <span>ESL <span class="external-link-icon">↗</span></span>
+                        </a>
+                        <a href="https://www.consultaie.com.br/" target="_blank" class="link-item">
+                            <span>Consulta IE <span class="external-link-icon">↗</span></span>
+                        </a>
+                        <a href="https://www.gnre.pe.gov.br:444/gnre/v/guia/index" target="_blank" class="link-item">
+                            <span>Portal GNRE <span class="external-link-icon">↗</span></span>
+                        </a>
+                        <a href="https://meudanfe.com.br/" target="_blank" class="link-item">
+                            <span>CHAVE NF PARA DANFE <span class="external-link-icon">↗</span></span>
+                        </a>
+                        <a href="https://www.ilovepdf.com/pt/jpg_para_pdf" target="_blank" class="link-item">
+                            <span>CONVERSOR PDF <span class="external-link-icon">↗</span></span>
+                        </a>
+                        <a href="https://novacentral.fretebras.com.br/" target="_blank" class="link-item">
+                            <span>FRETE BRAS <span class="external-link-icon">↗</span></span>
+                        </a>
+                        <a href="https://www.google.com/maps/d/u/0/viewer?mid=1Ekyo9pMAb-pBYy7fspI-PipC-oI&ll=-23.589558295833292%2C-46.57999357819071&z=12" target="_blank" class="link-item">
+                            <span>AREA DE RODIZIO SP <span class="external-link-icon">↗</span></span>
+                        </a>
+                        <a href="https://play.google.com/store/apps/details?id=br.com.esl.eslclouddelivery" target="_blank" class="link-item">
+                            <span>ESL MOBILE PLAYSTORE <span class="external-link-icon">↗</span></span>
+                        </a>
+                        <a href="https://play.google.com/store/apps/details?id=com.awarelog.saas.driverapp" target="_blank" class="link-item">
+                            <span>BLUEBEE PLAY STORE <span class="external-link-icon">↗</span></span>
+                        </a>
+                        <a href="https://app.motoristapx.com.br/" target="_blank" class="link-item">
+                            <span>PX Ajudantes <span class="external-link-icon">↗</span></span>
+                        </a>
+                    </div>
+                </div>
+            </div>
+
+            <div class="no-results hidden" id="noResults">
+                <p>Nenhum link encontrado para sua busca.</p>
+            </div>
+
+            <div class="stats">
+                <div class="stat-item">
+                    <span class="stat-number" id="totalLinks">0</span>
+                    <div class="stat-label">Total de Links</div>
+                </div>
+                <div class="stat-item">
+                    <span class="stat-number" id="totalCategories">0</span>
+                    <div class="stat-label">Categorias</div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Contagem de links e categorias
+        const totalLinks = document.querySelectorAll(".link-item").length;
+        const totalCategories = document.querySelectorAll(".category-card").length;
+        
+        document.getElementById("totalLinks").textContent = totalLinks;
+        document.getElementById("totalCategories").textContent = totalCategories;
+
+        // Funcionalidade de personalização
+        function toggleCustomization() {
+            const panel = document.getElementById('customizationPanel');
+            panel.classList.toggle('open');
+        }
+
+        function updateColors() {
+            const primaryColor = document.getElementById('primaryColor').value;
+            const secondaryColor = document.getElementById('secondaryColor').value;
+            const headerBg = document.getElementById('headerBg').value;
+            const headerText = document.getElementById('headerText').value;
+            const linkBg = document.getElementById('linkBg').value;
+            const linkText = document.getElementById('linkText').value;
+
+            document.documentElement.style.setProperty('--primary-color', primaryColor);
+            document.documentElement.style.setProperty('--secondary-color', secondaryColor);
+            document.documentElement.style.setProperty('--header-bg', headerBg);
+            document.documentElement.style.setProperty('--header-text', headerText);
+            document.documentElement.style.setProperty('--link-bg', linkBg);
+            document.documentElement.style.setProperty('--link-text', linkText);
+
+            // Salvar no localStorage
+            localStorage.setItem('customization', JSON.stringify({
+                primaryColor,
+                secondaryColor,
+                headerBg,
+                headerText,
+                linkBg,
+                linkText
+            }));
+        }
+
+        function updateFont() {
+            const fontFamily = document.getElementById('fontFamily').value;
+            document.documentElement.style.setProperty('--body-font', fontFamily);
+            
+            // Salvar no localStorage
+            const saved = JSON.parse(localStorage.getItem('customization') || '{}');
+            saved.fontFamily = fontFamily;
+            localStorage.setItem('customization', JSON.stringify(saved));
+        }
+
+        function resetToDefault() {
+            document.getElementById('primaryColor').value = '#667eea';
+            document.getElementById('secondaryColor').value = '#764ba2';
+            document.getElementById('headerBg').value = '#ffffff';
+            document.getElementById('headerText').value = '#333333';
+            document.getElementById('linkBg').value = '#f8f9fa';
+            document.getElementById('linkText').value = '#333333';
+            document.getElementById('fontFamily').value = "'Segoe UI', Tahoma, Geneva, Verdana, sans-serif";
+            
+            updateColors();
+            updateFont();
+            
+            // Limpar localStorage
+            localStorage.removeItem('customization');
+        }
+
+        // Carregar configurações salvas
+        function loadSavedCustomization() {
+            const saved = JSON.parse(localStorage.getItem('customization') || '{}');
+            
+            if (saved.primaryColor) {
+                document.getElementById('primaryColor').value = saved.primaryColor;
+                document.getElementById('secondaryColor').value = saved.secondaryColor;
+                document.getElementById('headerBg').value = saved.headerBg;
+                document.getElementById('headerText').value = saved.headerText;
+                document.getElementById('linkBg').value = saved.linkBg;
+                document.getElementById('linkText').value = saved.linkText;
+                
+                if (saved.fontFamily) {
+                    document.getElementById('fontFamily').value = saved.fontFamily;
+                }
+                
+                updateColors();
+                updateFont();
+            }
+        }
+
+        // Carregar ao inicializar
+        loadSavedCustomization();
+
+        // Funcionalidade de busca
+        const searchInput = document.getElementById("searchInput");
+        const categoriesGrid = document.getElementById("categoriesGrid");
+        const noResults = document.getElementById("noResults");
+
+        searchInput.addEventListener("input", function() {
+            const searchTerm = this.value.toLowerCase();
+            const categoryCards = document.querySelectorAll(".category-card");
+            let hasVisibleResults = false;
+
+            categoryCards.forEach(card => {
+                const categoryName = card.dataset.category.toLowerCase();
+                const links = card.querySelectorAll(".link-item");
+                let hasMatchingLinks = false;
+
+                const categoryMatches = categoryName.includes(searchTerm);
+
+                links.forEach(link => {
+                    const linkText = link.querySelector("span").textContent.toLowerCase();
+                    const linkMatches = linkText.includes(searchTerm);
+                    
+                    if (linkMatches || categoryMatches) {
+                        link.style.display = "block";
+                        link.classList.add("highlighted-link");
+                        hasMatchingLinks = true;
+                    } else {
+                        link.style.display = "none";
+                        link.classList.remove("highlighted-link");
+                    }
+                });
+
+                if (hasMatchingLinks || categoryMatches) {
+                    card.style.display = "block";
+                    hasVisibleResults = true;
+                } else {
+                    card.style.display = "none";
+                }
+            });
+
+            if (hasVisibleResults) {
+                categoriesGrid.style.display = "grid";
+                noResults.classList.add("hidden");
+            } else {
+                categoriesGrid.style.display = "none";
+                noResults.classList.remove("hidden");
+            }
+        });
+
+        searchInput.addEventListener("input", function() {
+            if (this.value === "") {
+                document.querySelectorAll(".category-card").forEach(card => {
+                    card.style.display = "block";
+                });
+                document.querySelectorAll(".link-item").forEach(link => {
+                    link.style.display = "block";
+                    link.classList.remove("highlighted-link");
+                });
+                categoriesGrid.style.display = "grid";
+                noResults.classList.add("hidden");
+            }
+        });
+    </script>
+</body>
+</html>
+
